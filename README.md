@@ -481,7 +481,7 @@ The local server step is therefore recommended.
 
 - [Quickstart](docs/Quickstart.md)
 - [FAQ](docs/FAQ.md)
-- [Structural Resolution Guarantees](docs/SNARE-Structural-Resolution-Guarantees.md)
+- [Structural Resolution Guarantees](docs/SNARE-Resolution-Guarantees.md)
 - [SNARE Architecture Notes](docs/SNARE-Architecture-Notes.md)
 - [SNARE Challenge](docs/SNARE-Challenge.md)
 
