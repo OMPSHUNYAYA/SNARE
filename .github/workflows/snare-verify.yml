@@ -1,0 +1,238 @@
+name: snare-verify
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Verify repository structure
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import sys
+
+          required = [
+              "README.md",
+              "LICENSE",
+              "demo/snare_learning_demo_v1_0.py",
+              "demo/SNARE_v1_0.html",
+              "outputs/snare_initial_resolution_report_v1_0.csv",
+              "outputs/snare_initial_resolution_report_v1_0.json",
+              "outputs/snare_future_resolution_report_v1_0.csv",
+              "outputs/snare_future_resolution_report_v1_0.json",
+              "outputs/snare_mature_rules_v1_0.csv",
+              "outputs/snare_mature_rules_v1_0.json",
+              "outputs/snare_profile_comparison_report_v1_0.csv",
+              "outputs/snare_profile_comparison_report_v1_0.json",
+              "outputs/snare_attention_ledger_v1_0.csv",
+              "outputs/snare_attention_ledger_v1_0.json",
+              "VERIFY/VERIFY.txt",
+              "VERIFY/FREEZE_DEMO_SHA256.txt",
+              "docs/Quickstart.md",
+              "docs/FAQ.md",
+              "docs/SNARE-Resolution-Guarantees.md",
+              "docs/SNARE-Architecture-Notes.md",
+              "docs/SNARE-Challenge.md",
+              "docs/SNARE-Diagram.png",
+              "docs/Dependency-Elimination-Framework.png",
+              "docs/Shunyaya-Structural-Stack.png",
+              "historical_foundation/README.md",
+              "historical_foundation/smaire_kernel.py",
+              "historical_foundation/SMAIRE-Diagram.png",
+          ]
+
+          missing = [p for p in required if not Path(p).exists()]
+
+          if missing:
+              print("Missing files:")
+              for item in missing:
+                  print("-", item)
+              sys.exit(1)
+
+          print("Repository structure verified.")
+          PY
+
+      - name: Verify frozen hashes
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib
+          import re
+          import sys
+          from pathlib import Path
+
+          freeze = Path("VERIFY/FREEZE_DEMO_SHA256.txt").read_text(
+              encoding="utf-8",
+              errors="replace"
+          )
+
+          targets = [
+              "demo/snare_learning_demo_v1_0.py",
+              "demo/SNARE_v1_0.html",
+          ]
+
+          for target in targets:
+              actual = hashlib.sha256(Path(target).read_bytes()).hexdigest().lower()
+
+              variants = [
+                  re.escape(target),
+                  re.escape(target.replace("/", "\\")),
+              ]
+
+              pattern = rf"({'|'.join(variants)})\s+SHA256:\s+([0-9a-f]{{64}})"
+
+              match = re.search(pattern, freeze, re.IGNORECASE)
+
+              if not match:
+                  print("Missing hash entry:", target)
+                  sys.exit(1)
+
+              expected = match.group(2).lower()
+
+              if expected != actual:
+                  print("Hash mismatch:", target)
+                  print("Expected:", expected)
+                  print("Actual:", actual)
+                  sys.exit(1)
+
+          print("Frozen hashes verified.")
+          PY
+
+      - name: Generate SNARE outputs
+        run: |
+          python demo/snare_learning_demo_v1_0.py --out_dir OUT_SNARE_VERIFY_1
+
+      - name: Verify deterministic replay
+        shell: bash
+        run: |
+          python - <<'PY'
+          import filecmp
+          import subprocess
+          import sys
+          from pathlib import Path
+
+          cmd = [
+              sys.executable,
+              "demo/snare_learning_demo_v1_0.py",
+              "--out_dir",
+              "OUT_SNARE_VERIFY_2",
+          ]
+
+          subprocess.run(cmd, check=True)
+
+          required = [
+              "snare_initial_resolution_report_v1_0.csv",
+              "snare_initial_resolution_report_v1_0.json",
+              "snare_future_resolution_report_v1_0.csv",
+              "snare_future_resolution_report_v1_0.json",
+              "snare_mature_rules_v1_0.csv",
+              "snare_mature_rules_v1_0.json",
+              "snare_profile_comparison_report_v1_0.csv",
+              "snare_profile_comparison_report_v1_0.json",
+              "snare_attention_ledger_v1_0.csv",
+              "snare_attention_ledger_v1_0.json",
+          ]
+
+          for name in required:
+              first = Path("OUT_SNARE_VERIFY_1") / name
+              second = Path("OUT_SNARE_VERIFY_2") / name
+
+              if not first.exists() or not second.exists():
+                  print("Missing generated output:", name)
+                  sys.exit(1)
+
+              if not filecmp.cmp(first, second, shallow=False):
+                  print("Replay output divergence:", name)
+                  sys.exit(1)
+
+          print("Deterministic replay verified.")
+          PY
+
+      - name: Verify output semantics
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          import sys
+          from pathlib import Path
+
+          future = json.loads(Path("OUT_SNARE_VERIFY_1/snare_future_resolution_report_v1_0.json").read_text(encoding="utf-8"))
+          rules = json.loads(Path("OUT_SNARE_VERIFY_1/snare_mature_rules_v1_0.json").read_text(encoding="utf-8"))
+          ledger = json.loads(Path("OUT_SNARE_VERIFY_1/snare_attention_ledger_v1_0.json").read_text(encoding="utf-8"))
+
+          states = {row["state"] for row in future}
+          maturities = {row["maturity"] for row in rules}
+          profiles = {row["profile"] for row in ledger}
+
+          required_states = {"VISIBLE", "SILENT", "DELAYED", "ASK_USER", "QUARANTINED"}
+          required_maturities = {"ACTIVE", "CONFLICTED"}
+          required_profiles = {"DEFAULT", "FOCUS_MODE", "WORK_MODE", "FAMILY_MODE", "SLEEP_MODE"}
+
+          if not required_states.issubset(states):
+              print("Missing expected future states:", sorted(required_states - states))
+              sys.exit(1)
+
+          if not required_maturities.issubset(maturities):
+              print("Missing expected rule maturities:", sorted(required_maturities - maturities))
+              sys.exit(1)
+
+          if profiles != required_profiles:
+              print("Profile mismatch:", sorted(profiles))
+              sys.exit(1)
+
+          if not any(row.get("emergency_override") for row in future):
+              print("Missing emergency override demonstration.")
+              sys.exit(1)
+
+          if not all(row.get("trace_complete") for row in future):
+              print("Incomplete trace detected.")
+              sys.exit(1)
+
+          print("Output semantics verified.")
+          PY
+
+      - name: Verify README references
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import sys
+
+          text = Path("README.md").read_text(encoding="utf-8")
+
+          required = [
+              "Structural Notification Resolution Engine",
+              "notification_visible iff structure_admissible",
+              "event_exists != event_visible",
+              "same structure -> same visibility",
+              "demo/snare_learning_demo_v1_0.py",
+              "demo/SNARE_v1_0.html",
+              "VERIFY/FREEZE_DEMO_SHA256.txt",
+              "docs/SNARE-Resolution-Guarantees.md",
+              "historical_foundation/",
+          ]
+
+          missing = [item for item in required if item not in text]
+
+          if missing:
+              print("README missing:")
+              for item in missing:
+                  print("-", item)
+              sys.exit(1)
+
+          print("README verified.")
+          PY
