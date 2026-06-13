@@ -220,7 +220,7 @@ jobs:
               "event_exists != event_visible",
               "same structure -> same visibility",
               "demo/snare_learning_demo_v1_0.py",
-              "demo/SNARE_v1_0.html",
+              "SNARE_v1_0.html",
               "VERIFY/FREEZE_DEMO_SHA256.txt",
               "docs/SNARE-Resolution-Guarantees.md",
               "historical_foundation/",
