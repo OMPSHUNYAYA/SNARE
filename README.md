@@ -15,6 +15,8 @@
 ![Open-Standard](https://img.shields.io/badge/Open-Standard-blue)
 ![Shunyaya](https://img.shields.io/badge/Part%20of-Shunyaya%20Ecosystem-gold)
 
+[![snare-verify](https://github.com/OMPSHUNYAYA/SNARE/actions/workflows/snare-verify.yml/badge.svg)](https://github.com/OMPSHUNYAYA/SNARE/actions/workflows/snare-verify.yml)
+
 ---
 
 **Why should every notification become visible simply because it exists?**
