@@ -1,0 +1,6 @@
+profile,events_total,visible_count,grouped_count,delayed_count,silent_count,ask_user_count,quarantined_count,interruptions_requested,interruptions_granted,interruptions_held,emergency_events,emergency_overrides,emergency_blocked,attention_spent,budget_spent,interruption_load_score,ledger_certificate
+DEFAULT,11,4,1,1,2,1,2,4,2,2,2,1,1,3,2,360,bc9e935cedf69fea
+FOCUS_MODE,11,4,0,1,3,1,2,4,2,2,2,1,1,3,2,360,814b1b27ea34f22d
+WORK_MODE,11,5,1,0,2,1,2,5,2,3,2,1,1,3,2,385,3b369dd93d91fddf
+FAMILY_MODE,11,4,1,1,2,1,2,4,2,2,2,1,1,3,2,360,3c0ad4f805fdc590
+SLEEP_MODE,11,3,0,2,3,1,2,3,2,1,2,1,1,3,2,335,edb2b9ba92ed9441

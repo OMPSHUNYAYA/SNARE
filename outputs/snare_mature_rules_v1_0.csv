@@ -1,0 +1,3 @@
+structure_signature,state,group_key,delay_until,reason,learned_from_ids,support_count,conflict_count,confidence,threshold,maturity,active,observed_states,rule_certificate
+b97fb70d4954c88e9239f3e1,SILENT,,,USER_DECISION_RULE_ACTIVE,N009+N011,2,0,0.8,0.75,ACTIVE,True,SILENT:2,111cf8f3cfe82966
+3a5b628f3fbb74dc19a9406d,VISIBLE,,,USER_DECISION_RULE_CONFLICTED,N012+N013,1,1,0.4,0.75,CONFLICTED,False,SILENT:1;VISIBLE:1,c19d3c38ece4d22c

@@ -1,0 +1,34 @@
+[
+  {
+    "structure_signature": "b97fb70d4954c88e9239f3e1",
+    "state": "SILENT",
+    "group_key": "",
+    "delay_until": "",
+    "reason": "USER_DECISION_RULE_ACTIVE",
+    "learned_from_ids": "N009+N011",
+    "support_count": 2,
+    "conflict_count": 0,
+    "confidence": 0.8,
+    "threshold": 0.75,
+    "maturity": "ACTIVE",
+    "active": true,
+    "observed_states": "SILENT:2",
+    "rule_certificate": "111cf8f3cfe82966"
+  },
+  {
+    "structure_signature": "3a5b628f3fbb74dc19a9406d",
+    "state": "VISIBLE",
+    "group_key": "",
+    "delay_until": "",
+    "reason": "USER_DECISION_RULE_CONFLICTED",
+    "learned_from_ids": "N012+N013",
+    "support_count": 1,
+    "conflict_count": 1,
+    "confidence": 0.4,
+    "threshold": 0.75,
+    "maturity": "CONFLICTED",
+    "active": false,
+    "observed_states": "SILENT:1;VISIBLE:1",
+    "rule_certificate": "c19d3c38ece4d22c"
+  }
+]
