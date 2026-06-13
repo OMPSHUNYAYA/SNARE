@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SNARE v1.0 - Structural Notification Resolution Engine</title>
+  <link rel="icon" href="data:," />
+  <style>
+    :root{
+      --bg:#07111f;
+      --bg2:#0b1628;
+      --panel:rgba(255,255,255,.075);
+      --panel2:rgba(255,255,255,.11);
+      --line:rgba(255,255,255,.14);
+      --text:#eef6ff;
+      --muted:#b9c9e6;
+      --blue:#7fb0ff;
+      --mint:#69f0c8;
+      --gold:#ffd166;
+      --red:#ff6b7a;
+      --purple:#c8a2ff;
+      --gray:#a9b4c8;
+      --ink:#06111f;
+      --shadow:0 18px 54px rgba(0,0,0,.34);
+      --radius:22px;
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      min-height:100vh;
+      color:var(--text);
+      font-family:Inter,Segoe UI,Arial,sans-serif;
+      background:
+        radial-gradient(circle at 10% 0%, rgba(127,176,255,.18), transparent 30%),
+        radial-gradient(circle at 90% 0%, rgba(105,240,200,.13), transparent 26%),
+        linear-gradient(180deg,var(--bg) 0%,var(--bg2) 100%);
+    }
+    .wrap{max-width:1440px;margin:0 auto;padding:10px 16px 16px;display:grid;gap:12px}
+    .topbar{
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:linear-gradient(135deg,rgba(127,176,255,.16),rgba(105,240,200,.07));
+      box-shadow:var(--shadow);
+      padding:9px 14px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:14px;
+      min-height:54px;
+    }
+    .title{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+    h1{margin:0;font-size:1.12rem;letter-spacing:-.02em}
+    .subtitle{color:var(--muted);font-size:.84rem}
+    .law{display:flex;gap:7px;flex-wrap:wrap;justify-content:flex-end}
+    code{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:rgba(0,0,0,.28);border:1px solid rgba(255,255,255,.10);padding:3px 7px;border-radius:8px;color:#dbeaff;font-size:.75rem}
+    .grid{display:grid;grid-template-columns:300px minmax(0,1fr);gap:12px;align-items:start}
+    .panel{
+      border:1px solid var(--line);
+      border-radius:var(--radius);
+      background:linear-gradient(180deg,rgba(255,255,255,.09),rgba(255,255,255,.045));
+      box-shadow:var(--shadow);
+      overflow:hidden;
+      min-height:0;
+    }
+    .panel h2{
+      margin:0;
+      padding:10px 13px;
+      border-bottom:1px solid var(--line);
+      font-size:.92rem;
+      letter-spacing:.01em;
+    }
+    .body{padding:12px}
+    .cases{display:grid;gap:8px}
+    .case{
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.055);
+      border-radius:15px;
+      padding:10px 11px;
+      cursor:pointer;
+      transition:.16s ease;
+    }
+    .case:hover,.case.active{transform:translateX(2px);background:rgba(127,176,255,.14);border-color:rgba(127,176,255,.42)}
+    .case b{display:block;margin-bottom:3px}
+    .case span{display:block;color:var(--muted);font-size:.8rem;line-height:1.35}
+    .main-stack{display:grid;gap:12px}
+    .active-area{display:grid;grid-template-columns:minmax(360px,.72fr) minmax(360px,1fr);gap:12px;align-items:start}
+    .compact-form{display:grid;gap:10px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+    label{display:grid;gap:5px;color:var(--muted);font-size:.72rem;text-transform:uppercase;letter-spacing:.08em;font-weight:850}
+    input,select{
+      width:100%;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.26);
+      color:var(--text);
+      border-radius:12px;
+      padding:10px;
+      font:inherit;
+      outline:none;
+      min-width:0;
+    }
+    .flags{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+    .check{
+      display:flex;
+      align-items:center;
+      gap:7px;
+      border:1px solid rgba(255,255,255,.10);
+      background:rgba(255,255,255,.045);
+      border-radius:12px;
+      padding:8px 9px;
+      color:var(--text);
+      font-size:.8rem;
+      letter-spacing:0;
+      text-transform:none;
+      min-width:0;
+    }
+    .check input{width:auto;min-width:auto}
+    .buttons{display:flex;gap:8px;flex-wrap:wrap}
+    button{
+      border:1px solid var(--line);
+      border-radius:999px;
+      padding:10px 13px;
+      background:rgba(255,255,255,.08);
+      color:var(--text);
+      font-weight:900;
+      cursor:pointer;
+      transition:.16s ease;
+      font-family:inherit;
+    }
+    button:hover{transform:translateY(-1px);background:rgba(255,255,255,.13)}
+    button.primary{background:linear-gradient(135deg,var(--blue),var(--mint));color:var(--ink);border:none}
+    .result-card{
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(0,0,0,.20);
+      border-radius:20px;
+      padding:14px;
+      display:grid;
+      gap:11px;
+    }
+    .state-row{display:flex;gap:10px;align-items:center;justify-content:space-between}
+    .state{font-size:2rem;line-height:1;font-weight:950;letter-spacing:-.04em}
+    .badge{display:inline-flex;align-items:center;border:1px solid rgba(255,255,255,.12);border-radius:999px;padding:5px 9px;font-size:.78rem;font-weight:900;white-space:nowrap}
+    .VISIBLE{color:var(--mint)}
+    .GROUPED{color:var(--blue)}
+    .DELAYED{color:var(--gold)}
+    .SILENT{color:var(--gray)}
+    .ASK_USER{color:var(--purple)}
+    .QUARANTINED{color:var(--red)}
+    .kv{display:grid;grid-template-columns:132px 1fr;gap:8px;font-size:.88rem;line-height:1.35}
+    .kv div:nth-child(odd){color:var(--muted)}
+    .cert{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.75rem;line-height:1.45;word-break:break-all;color:#dbeaff;background:rgba(0,0,0,.24);border:1px solid rgba(255,255,255,.08);padding:10px;border-radius:13px}
+    .mini-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+    .mini{border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.05);border-radius:14px;padding:9px;text-align:center}
+    .mini b{display:block;font-size:1.1rem}
+    .mini span{display:block;color:var(--muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+    details{
+      border:1px solid var(--line);
+      border-radius:18px;
+      background:rgba(255,255,255,.045);
+      overflow:hidden;
+    }
+    summary{
+      cursor:pointer;
+      padding:10px 12px;
+      color:var(--text);
+      font-weight:900;
+      list-style:none;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+    }
+    summary::-webkit-details-marker{display:none}
+    summary::after{content:"+";color:var(--muted);font-weight:900}
+    details[open] summary::after{content:"-"}
+    .details-body{padding:0 12px 12px}
+    .secondary{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
+    .trace{
+      max-height:190px;
+      overflow:auto;
+      background:rgba(0,0,0,.32);
+      border:1px solid rgba(255,255,255,.10);
+      border-radius:16px;
+      padding:12px;
+      font-family:ui-monospace,SFMono-Regular,Consolas,monospace;
+      color:#dbeaff;
+      line-height:1.55;
+      font-size:.76rem;
+      white-space:pre-wrap;
+      word-break:break-word;
+    }
+    .profiles{display:grid;gap:8px}
+    .profile{border:1px solid rgba(255,255,255,.10);background:rgba(255,255,255,.045);border-radius:14px;padding:9px 10px;display:grid;gap:5px}
+    .profile-top{display:flex;justify-content:space-between;gap:10px;font-weight:900;font-size:.84rem}
+    .profile small{color:var(--muted)}
+    .bar-track{height:7px;background:rgba(0,0,0,.25);border-radius:999px;overflow:hidden}
+    .bar{height:100%;background:linear-gradient(90deg,var(--blue),var(--mint));border-radius:999px}
+    table{width:100%;border-collapse:collapse;font-size:.8rem}
+    th,td{padding:7px 5px;border-bottom:1px solid rgba(255,255,255,.10);text-align:left;vertical-align:top}
+    th{color:var(--muted);font-size:.68rem;text-transform:uppercase;letter-spacing:.08em}
+    tr:last-child td{border-bottom:none}
+    .footer{color:var(--muted);text-align:center;font-size:.78rem;padding:2px 0}
+    @media(max-width:1180px){.grid,.active-area,.secondary{grid-template-columns:1fr}.topbar{align-items:flex-start;flex-direction:column}.law{justify-content:flex-start}}
+    @media(max-width:720px){.wrap{padding:10px}.row,.flags,.mini-grid{grid-template-columns:1fr}.state{font-size:1.55rem}.kv{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="topbar">
+      <div class="title">
+        <h1>SNARE v1.0</h1>
+        <div class="subtitle">Structural Notification Resolution Engine</div>
+      </div>
+      <div class="law">
+        <code>notification_visible iff structure_admissible</code>
+        <code>event_exists != event_visible</code>
+      </div>
+    </header>
+
+    <section class="grid">
+      <aside class="panel">
+        <h2>Sample Notifications</h2>
+        <div class="body">
+          <div class="cases" id="cases"></div>
+        </div>
+      </aside>
+
+      <main class="main-stack">
+        <section class="panel">
+          <h2>Active Input Output</h2>
+          <div class="body">
+            <div class="active-area">
+              <section class="compact-form">
+                <div class="row">
+                  <label>Sender<input id="sender" /></label>
+                  <label>Category<select id="category">
+                    <option>call</option><option>meeting</option><option>promotion</option><option>news</option><option>work</option><option>email</option><option>finance</option><option>security</option><option>medical</option><option>unknown</option><option>unknown_chat</option>
+                  </select></label>
+                </div>
+                <div class="row">
+                  <label>Profile<select id="profile">
+                    <option>DEFAULT</option><option selected>FOCUS_MODE</option><option>WORK_MODE</option><option>FAMILY_MODE</option><option>SLEEP_MODE</option>
+                  </select></label>
+                  <label>Urgency<select id="urgency">
+                    <option>normal</option><option>high</option><option>critical</option>
+                  </select></label>
+                </div>
+                <div class="flags">
+                  <label class="check"><input id="family" type="checkbox" /> Family</label>
+                  <label class="check"><input id="approved" type="checkbox" /> Approved</label>
+                  <label class="check"><input id="calendar" type="checkbox" /> Calendar</label>
+                  <label class="check"><input id="work" type="checkbox" /> Work</label>
+                  <label class="check"><input id="promo" type="checkbox" /> Promo</label>
+                  <label class="check"><input id="unknown" type="checkbox" /> Unknown</label>
+                  <label class="check"><input id="link" type="checkbox" /> Link</label>
+                  <label class="check"><input id="attachment" type="checkbox" /> Attachment</label>
+                  <label class="check"><input id="external" type="checkbox" /> External</label>
+                  <label class="check"><input id="critical" type="checkbox" /> Critical</label>
+                  <label class="check"><input id="emergency" type="checkbox" /> Emergency</label>
+                </div>
+                <div class="buttons">
+                  <button class="primary" onclick="resolveCurrent()">Resolve Visibility</button>
+                  <button onclick="resetBudget()">Reset Budget</button>
+                </div>
+              </section>
+
+              <section class="result-card">
+                <div class="state-row">
+                  <div id="state" class="state SILENT">SILENT</div>
+                  <div id="interrupt" class="badge">interrupt=false</div>
+                </div>
+                <div class="mini-grid">
+                  <div class="mini"><b id="budget">2</b><span>Budget</span></div>
+                  <div class="mini"><b id="risk">0</b><span>Risk</span></div>
+                  <div class="mini"><b id="priority">0</b><span>Priority</span></div>
+                  <div class="mini"><b id="traceOk">true</b><span>Trace</span></div>
+                </div>
+                <div class="kv">
+                  <div>Reason</div><div id="reason">GROUP_VISIBILITY_ADMISSIBLE_FOCUS_SILENT</div>
+                  <div>Gate</div><div id="gate">NO_INTERRUPTION_REQUESTED</div>
+                  <div>Emergency</div><div id="emergencyGate">NO_EMERGENCY</div>
+                  <div>Policy</div><div id="policyAction">POLICY_SILENCE</div>
+                </div>
+                <div class="cert" id="certificate">certificate=0000000000000000</div>
+              </section>
+            </div>
+          </div>
+        </section>
+
+        <section class="secondary">
+          <details>
+            <summary>Profile comparison</summary>
+            <div class="details-body"><div class="profiles" id="profiles"></div></div>
+          </details>
+
+          <details>
+            <summary>Reason trace</summary>
+            <div class="details-body"><div class="trace" id="trace"></div></div>
+          </details>
+
+          <details>
+            <summary>Audit trail</summary>
+            <div class="details-body">
+              <table>
+                <thead><tr><th>ID</th><th>State</th><th>Interrupt</th></tr></thead>
+                <tbody id="audit"></tbody>
+              </table>
+            </div>
+          </details>
+        </section>
+      </main>
+    </section>
+
+    <div class="footer">Observation: Sample structural notification resolution.</div>
+  </div>
+
+  <script>
+    const VERSION = "1.0";
+    let attentionBudget = 2;
+    let currentCase = 0;
+    let auditRows = [];
+
+    const samples = [
+      {id:"F003", title:"News Digest", sender:"DailyNews", category:"news", urgency:"normal"},
+      {id:"F004", title:"Unknown Email", sender:"unknown@example.com", category:"email", urgency:"high", unknown:true, link:true, attachment:true, external:true},
+      {id:"F005", title:"Work After Hours", sender:"Work Team", category:"work", urgency:"normal", work:true},
+      {id:"F007", title:"Family Call", sender:"Father", category:"call", urgency:"high", family:true},
+      {id:"F008", title:"Bank Alert", sender:"Bank Alert", category:"finance", urgency:"high", approved:true},
+      {id:"F009", title:"System Security", sender:"Device", category:"security", urgency:"high", critical:true},
+      {id:"F010", title:"Emergency Sensor", sender:"Emergency Sensor", category:"medical", urgency:"critical", emergency:true, approved:true},
+      {id:"F011", title:"Risky Emergency", sender:"Unknown", category:"security", urgency:"critical", emergency:true, unknown:true, link:true, external:true}
+    ];
+
+    const learnedRules = {
+      "unknown|push|unknown|day|true|false|false|false|false|false|false": {state:"SILENT", confidence:0.8, support:2, conflicts:0, maturity:"ACTIVE", source:"N009+N011"},
+      "unknown_chat|push|unknown|day|true|false|false|false|false|false|false": {state:"VISIBLE", confidence:0.4, support:1, conflicts:1, maturity:"CONFLICTED", source:"N012+N013"}
+    };
+
+    function cert(value, length=16){
+      const text = JSON.stringify(value, Object.keys(value).sort());
+      let h1 = 0x811c9dc5;
+      for(let i=0;i<text.length;i++){
+        h1 ^= text.charCodeAt(i);
+        h1 += (h1<<1)+(h1<<4)+(h1<<7)+(h1<<8)+(h1<<24);
+      }
+      let hex = (h1>>>0).toString(16).padStart(8,"0");
+      return (hex + hex + hex).slice(0,length);
+    }
+
+    function val(id){return document.getElementById(id).value}
+    function checked(id){return document.getElementById(id).checked}
+
+    function eventFromForm(){
+      return {
+        id:samples[currentCase].id,
+        sender:val("sender"),
+        category:val("category"),
+        channel:"push",
+        profile:val("profile"),
+        urgency:val("urgency"),
+        family:checked("family"),
+        approved:checked("approved"),
+        calendar:checked("calendar"),
+        work:checked("work"),
+        promo:checked("promo"),
+        unknown:checked("unknown"),
+        link:checked("link"),
+        attachment:checked("attachment"),
+        external:checked("external"),
+        critical:checked("critical"),
+        emergency:checked("emergency")
+      };
+    }
+
+    function signatureKey(e){
+      return [e.category,e.channel,e.urgency,"day",e.unknown,e.link,e.attachment,e.external,e.promo,e.critical,e.emergency].join("|");
+    }
+
+    function riskScore(e){
+      let r = 0;
+      if(e.unknown) r += 3;
+      if(e.link) r += 2;
+      if(e.attachment) r += 2;
+      if(e.external) r += 1;
+      if(["high","critical"].includes(e.urgency) && e.unknown) r += 2;
+      return r;
+    }
+
+    function baseResolve(e){
+      const risk = riskScore(e);
+      if(risk >= 5) return {state:"QUARANTINED", reason:"RISK_STRUCTURE_LINK_ATTACHMENT_UNKNOWN", risk};
+      if(e.emergency && risk <= 2) return {state:"VISIBLE", reason:"EMERGENCY_STRUCTURE_ADMISSIBLE", risk};
+      if(e.critical) return {state:"VISIBLE", reason:"SYSTEM_CRITICAL_ADMISSIBLE", risk};
+      if(e.family) return {state:"VISIBLE", reason:"FAMILY_RELATION_ADMISSIBLE", risk};
+      if(e.calendar || e.approved) return {state:"VISIBLE", reason:"USER_APPROVED_OR_CALENDAR_ADMISSIBLE", risk};
+      if(e.promo || e.category === "promotion") return {state:"SILENT", reason:"PROMOTION_NOT_INTERRUPT_ADMISSIBLE", risk};
+      if(["news","social","updates"].includes(e.category)) return {state:"GROUPED", reason:"GROUP_VISIBILITY_ADMISSIBLE", risk};
+      if(e.work) return {state:"DELAYED", reason:"WORK_AFTER_HOURS_DELAYED", risk};
+      if(e.unknown) return {state:"ASK_USER", reason:"UNKNOWN_STRUCTURE_REQUIRES_USER_DECISION", risk};
+      return {state:"GROUPED", reason:"DEFAULT_GROUPED_VISIBILITY", risk};
+    }
+
+    function applyRules(e, base){
+      const rule = learnedRules[signatureKey(e)];
+      if(base.state === "ASK_USER" && rule){
+        if(rule.maturity === "ACTIVE") return {...base, state:rule.state, reason:"MATURE_RULE_APPLIED_FROM_" + rule.source, rule};
+        return {...base, state:"ASK_USER", reason:"RULE_CONFLICT_REQUIRES_USER_DECISION", rule};
+      }
+      return {...base, rule:null};
+    }
+
+    function applyPolicy(e, r){
+      const p = e.profile;
+      if(["QUARANTINED","ASK_USER"].includes(r.state) || e.emergency || e.critical) return {...r, action:"POLICY_NO_CHANGE"};
+      if(p === "FOCUS_MODE"){
+        if(e.family || ["finance","security"].includes(e.category)) return {...r, action:"POLICY_PRESERVE_VISIBLE"};
+        if(r.state === "VISIBLE") return {...r, state:"DELAYED", reason:r.reason + "_FOCUS_DELAYED", action:"POLICY_DELAY"};
+        if(r.state === "GROUPED") return {...r, state:"SILENT", reason:r.reason + "_FOCUS_SILENT", action:"POLICY_SILENCE"};
+      }
+      if(p === "WORK_MODE" && e.work && ["GROUPED","DELAYED","SILENT"].includes(r.state)) return {...r, state:"VISIBLE", reason:r.reason + "_WORK_VISIBLE", action:"POLICY_PROMOTE"};
+      if(p === "FAMILY_MODE" && e.family) return {...r, state:"VISIBLE", reason:r.reason + "_FAMILY_VISIBLE", action:"POLICY_PROMOTE"};
+      if(p === "SLEEP_MODE"){
+        if(e.family && ["high","critical"].includes(e.urgency)) return {...r, action:"POLICY_PRESERVE_VISIBLE"};
+        if(r.state === "VISIBLE") return {...r, state:"DELAYED", reason:r.reason + "_SLEEP_DELAYED", action:"POLICY_DELAY"};
+        if(r.state === "GROUPED") return {...r, state:"SILENT", reason:r.reason + "_SLEEP_SILENT", action:"POLICY_SILENCE"};
+      }
+      return {...r, action:"POLICY_NO_CHANGE"};
+    }
+
+    function priorityScore(e, state, risk){
+      let p = state === "VISIBLE" ? 50 : 0;
+      if(e.emergency) p += 50;
+      if(e.critical) p += 45;
+      if(e.family) p += 35;
+      if(["finance","security"].includes(e.category)) p += 25;
+      if(e.calendar) p += 20;
+      if(e.approved) p += 15;
+      if(["high","critical"].includes(e.urgency)) p += 10;
+      if(risk >= 5) p -= 40;
+      if(["SILENT","GROUPED","DELAYED","ASK_USER","QUARANTINED"].includes(state)) p -= 25;
+      return Math.max(0, Math.min(100, p));
+    }
+
+    function fullResolve(e, consumeBudget=true){
+      let trace = ["EVENT_RECEIVED","STRUCTURE_COMPLETE=True","STRUCTURE_CONSISTENT=True"];
+      let r = baseResolve(e);
+      trace.push("RISK_SCORE=" + r.risk);
+      trace.push("BASE_STATE=" + r.state);
+      trace.push("BASE_REASON=" + r.reason);
+      r = applyRules(e, r);
+      trace.push(r.rule ? "RULE_FOUND=" + r.rule.maturity : "RULE_FOUND=NO");
+      r = applyPolicy(e, r);
+      const priority = priorityScore(e, r.state, r.risk);
+      const budgetRequested = r.state === "VISIBLE";
+      const emergencySafe = e.emergency && r.risk <= 2 && r.state === "VISIBLE";
+      let budgetGranted = false;
+      let emergencyOverride = false;
+      let gate = "NO_INTERRUPTION_REQUESTED";
+      let emergencyGate = e.emergency ? "EMERGENCY_RISK_BLOCKED" : "NO_EMERGENCY";
+      let interrupt = false;
+      if(budgetRequested && priority >= 70 && attentionBudget > 0){
+        budgetGranted = true;
+        interrupt = true;
+        gate = "INTERRUPTION_BUDGET_GRANTED";
+        if(consumeBudget) attentionBudget -= 1;
+      }else if(budgetRequested && emergencySafe){
+        emergencyOverride = true;
+        interrupt = true;
+        gate = "EMERGENCY_OVERRIDE_GRANTED";
+        emergencyGate = "EMERGENCY_SAFE_OVERRIDE";
+      }else if(budgetRequested){
+        gate = "INTERRUPTION_BUDGET_EXHAUSTED";
+      }
+      if(e.emergency && !emergencySafe) emergencyGate = "EMERGENCY_RISK_BLOCKED";
+      trace.push("POLICY_PROFILE=" + e.profile);
+      trace.push("POLICY_ACTION=" + r.action);
+      trace.push("FINAL_STATE=" + r.state);
+      trace.push("PRIORITY_SCORE=" + priority);
+      trace.push("VISIBILITY_GATE=" + gate);
+      trace.push("INTERRUPT=" + interrupt);
+      const certificate = cert({version:VERSION,event:e,state:r.state,interrupt,gate,reason:r.reason},16);
+      return {...r, priority, budgetRequested, budgetGranted, emergencySafe, emergencyOverride, gate, emergencyGate, interrupt, certificate, trace};
+    }
+
+    function setSample(i){
+      currentCase = i;
+      const s = samples[i];
+      document.querySelectorAll(".case").forEach((x,idx)=>x.classList.toggle("active",idx===i));
+      document.getElementById("sender").value = s.sender || "";
+      document.getElementById("category").value = s.category || "unknown";
+      document.getElementById("urgency").value = s.urgency || "normal";
+      ["family","approved","calendar","work","promo","unknown","link","attachment","external","critical","emergency"].forEach(k=>{
+        document.getElementById(k).checked = !!s[k];
+      });
+      resolveCurrent();
+    }
+
+    function resolveCurrent(){
+      const e = eventFromForm();
+      const r = fullResolve(e, true);
+      const st = document.getElementById("state");
+      st.className = "state " + r.state;
+      st.textContent = r.state;
+      document.getElementById("interrupt").textContent = "interrupt=" + r.interrupt;
+      document.getElementById("reason").textContent = r.reason;
+      document.getElementById("gate").textContent = r.gate;
+      document.getElementById("emergencyGate").textContent = r.emergencyGate;
+      document.getElementById("policyAction").textContent = r.action;
+      document.getElementById("certificate").textContent = "certificate=" + r.certificate;
+      document.getElementById("trace").textContent = r.trace.join(" -> ");
+      document.getElementById("budget").textContent = attentionBudget;
+      document.getElementById("risk").textContent = r.risk;
+      document.getElementById("priority").textContent = r.priority;
+      document.getElementById("traceOk").textContent = "true";
+      auditRows.unshift({id:e.id,state:r.state,interrupt:r.interrupt});
+      auditRows = auditRows.slice(0,8);
+      renderAudit();
+      renderProfiles(e);
+    }
+
+    function renderAudit(){
+      document.getElementById("audit").innerHTML = auditRows.map(r => `<tr><td>${r.id}</td><td class="${r.state}">${r.state}</td><td>${r.interrupt}</td></tr>`).join("");
+    }
+
+    function renderProfiles(e){
+      const profiles = ["DEFAULT","FOCUS_MODE","WORK_MODE","FAMILY_MODE","SLEEP_MODE"];
+      const saved = attentionBudget;
+      const rows = profiles.map(p=>{
+        const r = fullResolve({...e, profile:p}, false);
+        return {profile:p, state:r.state, interrupt:r.interrupt, load:r.interrupt ? 100 : r.state==="VISIBLE" ? 65 : r.state==="QUARANTINED" ? 45 : 25};
+      });
+      attentionBudget = saved;
+      document.getElementById("profiles").innerHTML = rows.map(r=>`
+        <div class="profile">
+          <div class="profile-top"><span>${r.profile}</span><span class="${r.state}">${r.state}/${r.interrupt}</span></div>
+          <div class="bar-track"><div class="bar" style="width:${r.load}%"></div></div>
+          <small>profile resolution</small>
+        </div>
+      `).join("");
+    }
+
+    function resetBudget(){
+      attentionBudget = 2;
+      auditRows = [];
+      resolveCurrent();
+    }
+
+    function renderCases(){
+      document.getElementById("cases").innerHTML = samples.map((s,i)=>`
+        <div class="case ${i===0 ? "active" : ""}" onclick="setSample(${i})">
+          <b>${s.title}</b>
+          <span>${s.id} · ${s.category} · ${s.sender}</span>
+        </div>
+      `).join("");
+    }
+
+    renderCases();
+    setSample(0);
+  </script>
+</body>
+</html>
