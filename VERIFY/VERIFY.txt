@@ -1,0 +1,324 @@
+SNARE Verification — Structural Notification Resolution
+
+Structural Notification Resolution Engine
+
+---
+
+GENERATE REFERENCE OUTPUTS
+
+Run:
+
+python demo/snare_learning_demo_v1_0.py --out_dir outputs
+
+Expected outputs:
+
+snare_initial_resolution_report_v1_0
+snare_future_resolution_report_v1_0
+snare_mature_rules_v1_0
+snare_profile_comparison_report_v1_0
+snare_attention_ledger_v1_0
+
+---
+
+OPEN THE OBSERVATORY
+
+Start local server:
+
+python -m http.server 8000
+
+Open:
+
+http://localhost:8000/SNARE_v1_0.html
+
+---
+
+OBSERVE
+structural notification visibility
+notification preservation
+structural learning
+rule maturity
+conflict handling
+attention governance
+emergency handling
+profile comparison
+deterministic certificates
+replay stability
+
+---
+
+EXPECTED RESOLUTION STATES
+
+SNARE resolves notifications into:
+
+VISIBLE
+
+GROUPED
+
+DELAYED
+
+SILENT
+
+ASK_USER
+
+QUARANTINED
+
+---
+
+STRUCTURAL VISIBILITY RULE
+
+notification_visible iff structure_admissible
+
+Visibility is determined through structure.
+
+Existence alone is insufficient.
+
+---
+
+NOTIFICATION PRESERVATION
+
+event_exists != event_visible
+
+Expected:
+
+notifications remain preserved
+visibility may be withheld
+deletion is not required
+
+---
+
+VERIFY LEARNING
+
+Unknown structure:
+
+first_unknown
+-> ASK_USER
+
+User decisions:
+
+ASK_USER
+-> decision
+-> rule_signature
+
+Expected:
+
+Equivalent future structures may reuse mature rules.
+
+---
+
+VERIFY RULE MATURITY
+
+Expected:
+
+ACTIVE
+
+PENDING
+
+CONFLICTED
+
+Rule activation:
+
+rule_active iff confidence >= threshold AND conflicts = 0
+
+Expected:
+
+Conflicted rules remain blocked.
+
+---
+
+VERIFY ATTENTION GOVERNANCE
+
+Interruption rule:
+
+interrupt_allowed iff state = VISIBLE AND priority >= threshold AND budget_available
+
+Expected:
+
+visible notification
+!=
+interruption
+
+Visibility and interruption remain separate decisions.
+
+---
+
+VERIFY EMERGENCY HANDLING
+
+Emergency rule:
+
+emergency_interrupt_allowed iff emergency = true AND risk <= safe_limit
+
+Expected:
+
+safe emergency
+-> override possible
+
+unsafe emergency
+-> override blocked
+
+Emergency status alone is insufficient.
+
+---
+
+VERIFY POLICY PROFILES
+
+Profiles:
+
+DEFAULT
+
+FOCUS_MODE
+
+WORK_MODE
+
+FAMILY_MODE
+
+SLEEP_MODE
+
+Expected:
+
+same structure
++
+different profile
+->
+different visibility possible
+
+Structure remains unchanged.
+
+---
+
+VERIFY DETERMINISM
+
+Run repeatedly:
+
+python demo/snare_learning_demo_v1_0.py --out_dir outputs
+
+Expected:
+
+same structure
+->
+same visibility
+->
+same certificate
+
+Replay remains stable.
+
+---
+
+VERIFY REPRESENTATIVE CASES
+
+Case 1
+
+Family notification
+
+Expected:
+
+VISIBLE
+
+Case 2
+
+Promotion
+
+Expected:
+
+SILENT
+
+Case 3
+
+Unknown structure
+
+Expected:
+
+ASK_USER
+
+Case 4
+
+Risky unknown sender
+
+Expected:
+
+QUARANTINED
+
+Case 5
+
+Equivalent future structure after learning
+
+Expected:
+
+mature rule applied
+
+---
+
+VERIFY CERTIFICATES
+
+Expected:
+
+same structure -> same visibility -> same certificate
+
+Different structures may produce different certificates.
+
+Reference implementation uses SHA-256 derived certificates for demonstration.
+
+---
+
+VERIFY FILE IDENTITY
+
+Hash demo script:
+
+certutil -hashfile demo\snare_learning_demo_v1_0.py SHA256
+
+Hash observatory:
+
+certutil -hashfile demo\SNARE_v1_0.html SHA256
+
+Note:
+
+file hash = file identity
+
+certificate = structural resolution artifact
+
+---
+
+LINE ENDING NOTE
+
+Reference output files may contain CRLF or LF line endings depending on the platform used to generate them.
+
+Line-ending differences do not affect:
+
+visibility outcomes
+rule maturity
+profile comparison
+attention accounting
+certificates
+deterministic replay
+challenge validation
+
+A difference consisting solely of CRLF versus LF line endings is not considered a falsification of SNARE.
+
+---
+
+CORE INVARIANTS
+
+notification_visible iff structure_admissible
+
+event_exists != event_visible
+
+first_unknown -> ASK_USER
+
+rule_active iff confidence >= threshold AND conflicts = 0
+
+interrupt_allowed iff state = VISIBLE AND priority >= threshold AND budget_available
+
+emergency_interrupt_allowed iff emergency = true AND risk <= safe_limit
+
+same structure -> same visibility -> same certificate
+
+---
+
+RESULT
+
+Deterministic structural notification visibility behavior demonstrated within the bounded SNARE reference model.
+
+Visibility is explored through structure before interruption decisions occur.
+
+Structure first.
+Visibility second.
+Attention last.

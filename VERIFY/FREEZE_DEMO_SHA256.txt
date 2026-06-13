@@ -1,0 +1,21 @@
+SNARE Demo Freeze (SHA256)
+
+demo\snare_learning_demo_v1_0.py
+
+SHA256:
+
+d84b561e89e714a359892ece27bbf2136a5c8ff58834ec209d43e2c5b8ea1584
+
+demo\SNARE_v1_0.html
+
+SHA256:
+
+dd3607f9e97a9afb7ded853929f287aa5c2e2c79f6cde4e8575a130c7b4d6b14
+
+same file -> same hash
+
+different file -> different hash
+
+file hash = file identity
+
+certificate = structural resolution artifact
